@@ -1,0 +1,406 @@
+{
+  "parsed_report": {
+    "design": "dma_controller",
+    "date": "2025-01-02",
+    "overall_coverage": 54.84,
+    "covergroups": [
+      {
+        "name": "cg_transfer_size",
+        "coverage": 75.0,
+        "coverpoints": [
+          {
+            "name": "cp_size",
+            "bins": [
+              {
+                "name": "small",
+                "range": "[0:255]",
+                "hits": 1523,
+                "covered": true
+              },
+              {
+                "name": "medium",
+                "range": "[256:1023]",
+                "hits": 892,
+                "covered": true
+              },
+              {
+                "name": "large",
+                "range": "[1024:4095]",
+                "hits": 445,
+                "covered": true
+              },
+              {
+                "name": "max",
+                "range": "[4096]",
+                "hits": 0,
+                "covered": false
+              }
+            ]
+          },
+          {
+            "name": "cp_burst_type",
+            "bins": [
+              {
+                "name": "single",
+                "range": null,
+                "hits": 2341,
+                "covered": true
+              },
+              {
+                "name": "incr",
+                "range": null,
+                "hits": 1822,
+                "covered": true
+              },
+              {
+                "name": "wrap",
+                "range": null,
+                "hits": 0,
+                "covered": false
+              },
+              {
+                "name": "fixed",
+                "range": null,
+                "hits": 234,
+                "covered": true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "cg_channel_arbitration",
+        "coverage": 60.0,
+        "coverpoints": [
+          {
+            "name": "cp_active_channels",
+            "bins": [
+              {
+                "name": "one_channel",
+                "range": null,
+                "hits": 5000,
+                "covered": true
+              },
+              {
+                "name": "two_channels",
+                "range": null,
+                "hits": 1200,
+                "covered": true
+              },
+              {
+                "name": "three_channels",
+                "range": null,
+                "hits": 45,
+                "covered": true
+              },
+              {
+                "name": "four_channels",
+                "range": null,
+                "hits": 0,
+                "covered": false
+              },
+              {
+                "name": "all_eight",
+                "range": null,
+                "hits": 0,
+                "covered": false
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "cg_error_scenarios",
+        "coverage": 33.33,
+        "coverpoints": [
+          {
+            "name": "cp_error_type",
+            "bins": [
+              {
+                "name": "no_error",
+                "range": null,
+                "hits": 10000,
+                "covered": true
+              },
+              {
+                "name": "slave_error",
+                "range": null,
+                "hits": 234,
+                "covered": true
+              },
+              {
+                "name": "decode_error",
+                "range": null,
+                "hits": 0,
+                "covered": false
+              },
+              {
+                "name": "timeout",
+                "range": null,
+                "hits": 0,
+                "covered": false
+              }
+            ]
+          },
+          {
+            "name": "cp_error_recovery",
+            "bins": [
+              {
+                "name": "retry_success",
+                "range": null,
+                "hits": 0,
+                "covered": false
+              },
+              {
+                "name": "abort",
+                "range": null,
+                "hits": 0,
+                "covered": false
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "uncovered_bins": [
+      {
+        "covergroup": "cg_transfer_size",
+        "coverpoint": "cp_size",
+        "bin": "max[4096]"
+      },
+      {
+        "covergroup": "cg_transfer_size",
+        "coverpoint": "cp_burst_type",
+        "bin": "wrap"
+      },
+      {
+        "covergroup": "cg_channel_arbitration",
+        "coverpoint": "cp_active_channels",
+        "bin": "four_channels"
+      },
+      {
+        "covergroup": "cg_channel_arbitration",
+        "coverpoint": "cp_active_channels",
+        "bin": "all_eight"
+      },
+      {
+        "covergroup": "cg_error_scenarios",
+        "coverpoint": "cp_error_type",
+        "bin": "decode_error"
+      },
+      {
+        "covergroup": "cg_error_scenarios",
+        "coverpoint": "cp_error_type",
+        "bin": "timeout"
+      },
+      {
+        "covergroup": "cg_error_scenarios",
+        "coverpoint": "cp_error_recovery",
+        "bin": "retry_success"
+      },
+      {
+        "covergroup": "cg_error_scenarios",
+        "coverpoint": "cp_error_recovery",
+        "bin": "abort"
+      }
+    ],
+    "cross_coverage": [
+      {
+        "name": "cross_size_burst",
+        "coverage": 50.0,
+        "uncovered": [
+          "<small, wrap>",
+          "<medium, wrap>",
+          "<medium, fixed>",
+          "<large, incr>",
+          "<large, wrap>",
+          "<large, fixed>"
+        ]
+      }
+    ]
+  },
+  "suggestions": [
+    {
+      "target_bin": "cg_transfer_size.cp_size.max",
+      "priority": "high",
+      "difficulty": "easy",
+      "suggestion": "Configure a DMA transfer with maximum allowable transfer size of 4096 bytes (4KB boundary) on an idle channel.",
+      "test_outline": [
+        "1. Select channel 0 and initialize control registers",
+        "2. Program transfer length to 4096 bytes",
+        "3. Verify byte counter decrements to zero without premature burst termination",
+        "4. Check completion interrupt and status register"
+      ],
+      "dependencies": [],
+      "reasoning": "Small, medium, and large transfers are already covered with thousands of hits. The max boundary (4096 bytes) is simply an untested edge condition that requires programming length to full capacity.",
+      "priority_score": 0.65,
+      "coverage_impact": 0.125,
+      "inverse_difficulty": 1.0,
+      "dependency_score": 1.0
+    },
+    {
+      "target_bin": "cg_transfer_size.cp_burst_type.wrap",
+      "priority": "medium",
+      "difficulty": "medium",
+      "suggestion": "Create a test sequence that configures the DMA for wrap burst mode with a burst length that causes address wrapping. Set base address near a wrap boundary (e.g., 0xFFC for 4KB boundary) with burst length of 4.",
+      "test_outline": [
+        "1. Configure DMA channel with wrap burst type",
+        "2. Set transfer size to trigger address wrapping",
+        "3. Set base address near boundary (0xFFC)",
+        "4. Start transfer and verify wrap behavior"
+      ],
+      "dependencies": [
+        "Ensure AXI slave supports wrap bursts"
+      ],
+      "reasoning": "Wrap bursts are used for cache-line fills. The coverage shows INCR and SINGLE work, suggesting basic DMA functionality is correct. Wrap mode likely needs specific configuration.",
+      "priority_score": 0.5,
+      "coverage_impact": 0.5,
+      "inverse_difficulty": 0.5,
+      "dependency_score": 0.5
+    },
+    {
+      "target_bin": "cg_error_scenarios.cp_error_recovery.abort",
+      "priority": "medium",
+      "difficulty": "medium",
+      "suggestion": "Issue an explicit software abort command via the channel control register while a multi-beat transfer is actively in flight.",
+      "test_outline": [
+        "1. Start a large 4KB transfer on channel 0",
+        "2. Wait for transfer to enter active burst phase (e.g. 50% progress)",
+        "3. Write channel abort bit in DMA_CH_CTRL register",
+        "4. Verify DMA cleanly finishes current AXI burst, terminates pipeline, and asserts aborted status"
+      ],
+      "dependencies": [],
+      "reasoning": "Aborts are software-driven commands. Without explicit testbench intervention mid-transfer, this state will never be reached in random testing.",
+      "priority_score": 0.5,
+      "coverage_impact": 0.125,
+      "inverse_difficulty": 0.5,
+      "dependency_score": 1.0
+    },
+    {
+      "target_bin": "cg_channel_arbitration.cp_active_channels.four_channels",
+      "priority": "low",
+      "difficulty": "medium",
+      "suggestion": "Initiate concurrent transfers across 4 active DMA channels simultaneously with equal priority to exercise round-robin and fixed-priority arbitration.",
+      "test_outline": [
+        "1. Configure channels 0, 1, 2, and 3 with independent source/dest buffers",
+        "2. Set priority arbitration weights in the arbiter configuration register",
+        "3. Assert start trigger simultaneously across all 4 channels",
+        "4. Check arbiter grant signals and ensure fair service without starvation"
+      ],
+      "dependencies": [
+        "Multi-channel testbench driver support"
+      ],
+      "reasoning": "Channels 1, 2, and 3 have been tested (one_channel, two_channels, three_channels covered). Testing 4 active channels ensures multi-master arbitration logic scales without deadlock.",
+      "priority_score": 0.35,
+      "coverage_impact": 0.125,
+      "inverse_difficulty": 0.5,
+      "dependency_score": 0.5
+    },
+    {
+      "target_bin": "cg_error_scenarios.cp_error_recovery.retry_success",
+      "priority": "low",
+      "difficulty": "medium",
+      "suggestion": "Configure DMA auto-retry on slave error, inject a single transient SLVERR response, then allow subsequent retry to succeed.",
+      "test_outline": [
+        "1. Enable DMA channel auto-retry feature (MAX_RETRIES = 3)",
+        "2. Program slave agent to respond with SLVERR on first attempt only",
+        "3. Ensure second attempt returns OKAY response",
+        "4. Verify retry counter incremented and transfer finished successfully"
+      ],
+      "dependencies": [
+        "Programmable AXI error injector with single-pulse failure mode"
+      ],
+      "reasoning": "Slave error is covered, but recovery logic has 0 hits. Testing recovery proves the hardware can cleanly resume after transient interconnect glitches.",
+      "priority_score": 0.35,
+      "coverage_impact": 0.125,
+      "inverse_difficulty": 0.5,
+      "dependency_score": 0.5
+    },
+    {
+      "target_bin": "cg_channel_arbitration.cp_active_channels.all_eight",
+      "priority": "low",
+      "difficulty": "hard",
+      "suggestion": "Create a stress test that configures and kicks off all 8 DMA channels concurrently under heavy memory contention.",
+      "test_outline": [
+        "1. Program descriptors and buffer pointers for all 8 DMA channels",
+        "2. Enable continuous burst traffic across all channels concurrently",
+        "3. Monitor bus request/grant latency for channel 7 (lowest priority)",
+        "4. Verify all channels complete transfers and clear busy flags"
+      ],
+      "dependencies": [
+        "High memory bandwidth testbench environment",
+        "Sufficient AXI outstanding transactions capacity"
+      ],
+      "reasoning": "Full channel saturation (all 8 channels) is an extreme stress condition. Since 1-3 channels are covered, testing all eight ensures arbitration queue depths do not overflow under peak load.",
+      "priority_score": 0.3,
+      "coverage_impact": 0.125,
+      "inverse_difficulty": 0.3333,
+      "dependency_score": 0.5
+    },
+    {
+      "target_bin": "cg_error_scenarios.cp_error_type.decode_error",
+      "priority": "low",
+      "difficulty": "hard",
+      "suggestion": "Inject a decode error by programming DMA to access an unmapped address region. Configure error injection in the AXI interconnect or use a testbench force.",
+      "test_outline": [
+        "1. Identify unmapped address range in memory map",
+        "2. Configure DMA source/dest to unmapped region",
+        "3. Start transfer",
+        "4. Verify DECERR response and DMA error handling"
+      ],
+      "dependencies": [
+        "Testbench error injection capability",
+        "Knowledge of memory map"
+      ],
+      "reasoning": "Decode errors require accessing invalid addresses. Since no_error and slave_error are covered, the basic error path works. Need to specifically target decode error response.",
+      "priority_score": 0.3,
+      "coverage_impact": 0.125,
+      "inverse_difficulty": 0.3333,
+      "dependency_score": 0.5
+    },
+    {
+      "target_bin": "cg_error_scenarios.cp_error_type.timeout",
+      "priority": "low",
+      "difficulty": "hard",
+      "suggestion": "Simulate a bus stall or unresponsive target device by delaying AXI RVALID/BVALID signals beyond the watchdog timer threshold.",
+      "test_outline": [
+        "1. Program DMA watchdog timer register to a low timeout threshold",
+        "2. Configure DMA read transfer to memory address",
+        "3. Assert testbench delay on AXI slave RVALID to exceed timer",
+        "4. Check that DMA aborts transfer, sets timeout status bit, and raises error IRQ"
+      ],
+      "dependencies": [
+        "Configurable slave model with stall injection capability"
+      ],
+      "reasoning": "No timeout events have occurred in normal runs. Hardware watchdog triggers only when the slave fails to respond within programmed cycles.",
+      "priority_score": 0.3,
+      "coverage_impact": 0.125,
+      "inverse_difficulty": 0.3333,
+      "dependency_score": 0.5
+    }
+  ],
+  "prediction": {
+    "current_coverage": 54.84,
+    "target_coverage": 100.0,
+    "coverage_gap": 45.16,
+    "total_uncovered_bins": 8,
+    "estimated_iterations_needed": 15700,
+    "estimated_time_to_closure_hours": 41.5,
+    "closure_probability_pct": 68.0,
+    "blocking_bins": [
+      {
+        "bin": "cg_transfer_size.cp_burst_type.wrap",
+        "reason": "Dependency on: Ensure AXI slave supports wrap bursts",
+        "required_infrastructure": "Downstream memory controller does not support AXI WRAP bursts",
+        "risk_level": "MEDIUM"
+      },
+      {
+        "bin": "cg_error_scenarios.cp_error_type.decode_error",
+        "reason": "Dependency on: Testbench error injection capability",
+        "required_infrastructure": "Interconnect / AXI Error Injector IP missing or disabled",
+        "risk_level": "HIGH"
+      }
+    ],
+    "verdict": "MODERATE RISK: Closure achievable, but requires testbench infrastructure enhancements (e.g. error injection)."
+  }
+}

@@ -1,0 +1,56 @@
+=======================================================
+Functional Coverage Report
+Design: dma_controller
+Date: 2025-01-02
+=======================================================
+
+Covergroup: cg_transfer_size
+Coverage: 75.00% (6/8 bins)
+Coverpoint: cp_size
+bin small[0:255] hits: 1523 covered
+bin medium[256:1023] hits: 892 covered
+bin large[1024:4095] hits: 445 covered
+bin max[4096] hits: 0 UNCOVERED
+Coverpoint: cp_burst_type
+bin single hits: 2341 covered
+bin incr hits: 1822 covered
+bin wrap hits: 0 UNCOVERED
+bin fixed hits: 234 covered
+-------------------------------------------------------
+Covergroup: cg_channel_arbitration
+Coverage: 60.00% (3/5 bins)
+Coverpoint: cp_active_channels
+bin one_channel hits: 5000 covered
+bin two_channels hits: 1200 covered
+bin three_channels hits: 45 covered
+bin four_channels hits: 0 UNCOVERED
+bin all_eight hits: 0 UNCOVERED
+-------------------------------------------------------
+Covergroup: cg_error_scenarios
+Coverage: 33.33% (2/6 bins)
+Coverpoint: cp_error_type
+bin no_error hits: 10000 covered
+bin slave_error hits: 234 covered
+bin decode_error hits: 0 UNCOVERED
+bin timeout hits: 0 UNCOVERED
+Coverpoint: cp_error_recovery
+bin retry_success hits: 0 UNCOVERED
+bin abort hits: 0 UNCOVERED
+-------------------------------------------------------
+Cross Coverage: cross_size_burst
+Coverage: 50.00% (6/12 bins)
+<small, single> hits: 500 covered
+<small, incr> hits: 400 covered
+<small, wrap> hits: 0 UNCOVERED
+<small, fixed> hits: 100 covered
+<medium, single> hits: 300 covered
+<medium, incr> hits: 250 covered
+<medium, wrap> hits: 0 UNCOVERED
+<medium, fixed> hits: 0 UNCOVERED
+<large, single> hits: 200 covered
+<large, incr> hits: 0 UNCOVERED
+<large, wrap> hits: 0 UNCOVERED
+<large, fixed> hits: 0 UNCOVERED
+=======================================================
+Overall Coverage: 54.84%
+=======================================================

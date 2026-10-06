@@ -1,0 +1,270 @@
+{
+  "parsed_report": {
+    "design": "spi_master_controller",
+    "date": "2025-01-15",
+    "overall_coverage": 50.0,
+    "covergroups": [
+      {
+        "name": "cg_spi_clock_modes",
+        "coverage": 50.0,
+        "coverpoints": [
+          {
+            "name": "cp_cpol_cpha_mode",
+            "bins": [
+              {
+                "name": "mode_0",
+                "range": "[cpol0_cpha0]",
+                "hits": 8400,
+                "covered": true
+              },
+              {
+                "name": "mode_1",
+                "range": "[cpol0_cpha1]",
+                "hits": 3200,
+                "covered": true
+              },
+              {
+                "name": "mode_2",
+                "range": "[cpol1_cpha0]",
+                "hits": 0,
+                "covered": false
+              },
+              {
+                "name": "mode_3",
+                "range": "[cpol1_cpha1]",
+                "hits": 0,
+                "covered": false
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "cg_fifo_exceptions",
+        "coverage": 60.0,
+        "coverpoints": [
+          {
+            "name": "cp_fifo_watermarks",
+            "bins": [
+              {
+                "name": "fifo_empty",
+                "range": null,
+                "hits": 14000,
+                "covered": true
+              },
+              {
+                "name": "fifo_half",
+                "range": null,
+                "hits": 6500,
+                "covered": true
+              },
+              {
+                "name": "fifo_full",
+                "range": null,
+                "hits": 1200,
+                "covered": true
+              },
+              {
+                "name": "fifo_overflow",
+                "range": null,
+                "hits": 0,
+                "covered": false
+              },
+              {
+                "name": "fifo_underrun",
+                "range": null,
+                "hits": 0,
+                "covered": false
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "cg_chip_select",
+        "coverage": 66.67,
+        "coverpoints": [
+          {
+            "name": "cp_slave_select",
+            "bins": [
+              {
+                "name": "cs_slave_0",
+                "range": null,
+                "hits": 5400,
+                "covered": true
+              },
+              {
+                "name": "cs_slave_1",
+                "range": null,
+                "hits": 4100,
+                "covered": true
+              },
+              {
+                "name": "cs_broadcast",
+                "range": null,
+                "hits": 0,
+                "covered": false
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "uncovered_bins": [
+      {
+        "covergroup": "cg_spi_clock_modes",
+        "coverpoint": "cp_cpol_cpha_mode",
+        "bin": "mode_2[cpol1_cpha0]"
+      },
+      {
+        "covergroup": "cg_spi_clock_modes",
+        "coverpoint": "cp_cpol_cpha_mode",
+        "bin": "mode_3[cpol1_cpha1]"
+      },
+      {
+        "covergroup": "cg_fifo_exceptions",
+        "coverpoint": "cp_fifo_watermarks",
+        "bin": "fifo_overflow"
+      },
+      {
+        "covergroup": "cg_fifo_exceptions",
+        "coverpoint": "cp_fifo_watermarks",
+        "bin": "fifo_underrun"
+      },
+      {
+        "covergroup": "cg_chip_select",
+        "coverpoint": "cp_slave_select",
+        "bin": "cs_broadcast"
+      }
+    ],
+    "cross_coverage": [
+      {
+        "name": "cross_mode_fifo",
+        "coverage": 33.33,
+        "uncovered": [
+          "<mode_2, fifo_empty>",
+          "<mode_3, fifo_empty>",
+          "<mode_3, fifo_overflow>"
+        ]
+      }
+    ]
+  },
+  "suggestions": [
+    {
+      "target_bin": "cg_spi_clock_modes.cp_cpol_cpha_mode.mode_3",
+      "priority": "medium",
+      "difficulty": "medium",
+      "suggestion": "Configure the SPI master control register to set CPOL=1 and CPHA=1 (Mode 3). Run transactions under both normal conditions and stress conditions to trigger the associated cross-coverage holes (fifo_empty and fifo_overflow) for mode_3.",
+      "test_outline": [
+        "1. Initialize SPI master register with CPOL=1 and CPHA=1 for Mode 3 operation",
+        "2. Execute a standard data transfer to ensure basic Mode 3 functionality is reached",
+        "3. Run a quick transaction without pre-loading the TX FIFO to hit the <mode_3, fifo_empty> cross bin",
+        "4. Overfill the TX FIFO while in Mode 3 to trigger the <mode_3, fifo_overflow> cross bin"
+      ],
+      "dependencies": [
+        "SPI master VIP support for CPOL=1 and CPHA=1",
+        "Ability to force FIFO underflow/overflow conditions"
+      ],
+      "reasoning": "Modes 0 and 1 are well-covered, indicating that base SPI frame generation and shift register logic are sound. However, Mode 3 (CPOL=1, CPHA=1) changes the clock polarity and phase sampling edge. The impacting cross-coverage holes show that mode_3 has never been tested in conjunction with FIFO empty and overflow edge cases.",
+      "priority_score": 0.54,
+      "coverage_impact": 0.6,
+      "inverse_difficulty": 0.5,
+      "dependency_score": 0.5
+    },
+    {
+      "target_bin": "cg_spi_clock_modes.cp_cpol_cpha_mode.mode_2",
+      "priority": "medium",
+      "difficulty": "medium",
+      "suggestion": "Configure the SPI master control register to set CPOL=1 and CPHA=0 (Mode 2). Execute a transmission while ensuring the TX FIFO becomes empty during the transfer to simultaneously hit the cross-coverage hole <mode_2, fifo_empty>.",
+      "test_outline": [
+        "1. Initialize SPI master register with CPOL=1, CPHA=0 configuration",
+        "2. Configure clock divider, frame size, and chip select",
+        "3. Queue a single short transaction or disable continuous transfer mode to induce a FIFO empty condition mid-transfer",
+        "4. Initiate transfer and verify serial data timing matches Mode 2 protocol requirements along with FIFO empty state handling"
+      ],
+      "dependencies": [
+        "SPI virtual sequencer and driver supporting CPOL/CPHA configuration",
+        "Scoreboard check for Mode 2 serial timing"
+      ],
+      "reasoning": "Mode 0 and Mode 1 are well-covered (8400 and 3200 hits respectively), indicating that the base SPI transmission state machine and clock generation logic are functional. However, CPOL=1 (Modes 2 and 3) remains completely uncovered. Targeting Mode 2 with the fifo_empty cross-coverage condition ensures robust protocol verification under idle FIFO constraints.",
+      "priority_score": 0.46,
+      "coverage_impact": 0.4,
+      "inverse_difficulty": 0.5,
+      "dependency_score": 0.5
+    },
+    {
+      "target_bin": "cg_fifo_exceptions.cp_fifo_watermarks.fifo_overflow",
+      "priority": "medium",
+      "difficulty": "medium",
+      "suggestion": "Configure the SPI master in mode 3 and aggressively push data into the transmit FIFO via the APB interface faster than the SPI clock can shift it out, specifically targeting the overflow condition when the FIFO is already full.",
+      "test_outline": [
+        "1. Configure SPI clock divider to a slow frequency to ensure fast TX FIFO filling",
+        "2. Set SPI transfer mode to mode 3",
+        "3. Fill the TX FIFO completely until the 'fifo_full' status is observed",
+        "4. Force additional write transactions to the TX FIFO while it is full to trigger 'fifo_overflow' and verify overflow flag/interrupt assertion"
+      ],
+      "dependencies": [
+        "APB VIP back-to-back write capability",
+        "SPI Master TX FIFO overflow status register monitoring"
+      ],
+      "reasoning": "The working bins (empty, half, full) prove that normal FIFO operation and threshold tracking are fully functional. However, the specific cross-coverage hole with mode 3 indicates that overflow handling under mode 3 timing needs to be explicitly exercised by violating the push/pop rate equilibrium.",
+      "priority_score": 0.46,
+      "coverage_impact": 0.4,
+      "inverse_difficulty": 0.5,
+      "dependency_score": 0.5
+    },
+    {
+      "target_bin": "cg_fifo_exceptions.cp_fifo_watermarks.fifo_underrun",
+      "priority": "low",
+      "difficulty": "medium",
+      "suggestion": "Configure the SPI master in slave-select mode or high-speed continuous transfer mode where the transmit FIFO becomes empty while the SPI clock is still actively shifting data out. This forces an underrun condition.",
+      "test_outline": [
+        "1. Configure SPI master clock rate and transfer length",
+        "2. Send a short data packet without keeping the TX FIFO refilled",
+        "3. Enable continuous transmission or high clock frequency to outpace CPU/DMA refill rate",
+        "4. Monitor SPI master interrupt status and error flags for FIFO underrun assertion"
+      ],
+      "dependencies": [
+        "SPI master TX FIFO empty interrupt/status monitoring",
+        "Ability to control TX FIFO push pacing relative to shift register clock"
+      ],
+      "reasoning": "The coverage report shows standard FIFO states like fifo_empty, fifo_half, and fifo_full are well hit (over 12,000 hits total), proving normal data flow works. However, the fifo_underrun exception bin requires timing where the hardware attempts to read from an empty TX FIFO mid-transfer, which demands deliberately starving the FIFO during an active SPI transaction.",
+      "priority_score": 0.38,
+      "coverage_impact": 0.2,
+      "inverse_difficulty": 0.5,
+      "dependency_score": 0.5
+    },
+    {
+      "target_bin": "cg_chip_select.cp_slave_select.cs_broadcast",
+      "priority": "low",
+      "difficulty": "medium",
+      "suggestion": "Configure the SPI master controller to assert all chip select lines simultaneously using the broadcast address/mode register configuration. Execute a standard transfer while all slaves are concurrently selected.",
+      "test_outline": [
+        "1. Initialize SPI master controller with standard clock polarity and phase",
+        "2. Program the chip select register to select the broadcast pattern (all CS active low/high concurrently)",
+        "3. Initiate a write/read transaction via the TX FIFO",
+        "4. Verify that all slave interfaces observe active chip select signals and correctly sample the MOSI data simultaneously"
+      ],
+      "dependencies": [
+        "SPI slave VIP configured to handle broadcast/multi-select conditions",
+        "SPI master RTL support for broadcast chip-select encoding"
+      ],
+      "reasoning": "Working coverage for individual slave selections (cs_slave_0 and cs_slave_1) demonstrates that basic SPI master data transmission and single chip-select driving are fully functional. However, the broadcast selection mode (cs_broadcast), which asserts multiple chip selects in parallel, requires a specific register configuration that has not been exercised by standard directed or constrained-random tests.",
+      "priority_score": 0.38,
+      "coverage_impact": 0.2,
+      "inverse_difficulty": 0.5,
+      "dependency_score": 0.5
+    }
+  ],
+  "prediction": {
+    "current_coverage": 50.0,
+    "target_coverage": 100.0,
+    "coverage_gap": 50.0,
+    "total_uncovered_bins": 5,
+    "estimated_iterations_needed": 6000,
+    "estimated_time_to_closure_hours": 20.0,
+    "closure_probability_pct": 95.0,
+    "blocking_bins": [],
+    "verdict": "HIGH CONFIDENCE: Closure achievable with directed UVM test sequences."
+  }
+}

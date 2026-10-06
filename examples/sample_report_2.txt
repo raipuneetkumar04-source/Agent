@@ -1,0 +1,49 @@
+=======================================================
+Functional Coverage Report
+Design: axi_interconnect_crossbar
+Date: 2025-01-10
+=======================================================
+
+Covergroup: cg_transaction_burst
+Coverage: 66.67% (4/6 bins)
+Coverpoint: cp_burst_length
+bin len_1[1] hits: 8200 covered
+bin len_short[2:8] hits: 3450 covered
+bin len_medium[9:64] hits: 1120 covered
+bin len_max[256] hits: 0 UNCOVERED
+Coverpoint: cp_burst_type
+bin burst_fixed hits: 150 covered
+bin burst_incr hits: 12500 covered
+bin burst_wrap hits: 0 UNCOVERED
+-------------------------------------------------------
+Covergroup: cg_qos_priority_arbitration
+Coverage: 50.00% (2/4 bins)
+Coverpoint: cp_master_priority
+bin qos_low[0:3] hits: 4500 covered
+bin qos_normal[4:7] hits: 7800 covered
+bin qos_high[8:11] hits: 0 UNCOVERED
+bin qos_urgent[12:15] hits: 0 UNCOVERED
+-------------------------------------------------------
+Covergroup: cg_response_errors
+Coverage: 40.00% (2/5 bins)
+Coverpoint: cp_resp_status
+bin okay hits: 15600 covered
+bin exokay hits: 120 covered
+bin slverr hits: 0 UNCOVERED
+bin decerr hits: 0 UNCOVERED
+Coverpoint: cp_interconnect_timeout
+bin timer_expired hits: 0 UNCOVERED
+-------------------------------------------------------
+Cross Coverage: cross_burst_qos
+Coverage: 37.50% (3/8 bins)
+<len_1, qos_low> hits: 1200 covered
+<len_1, qos_normal> hits: 2400 covered
+<len_short, qos_low> hits: 850 covered
+<len_short, qos_high> hits: 0 UNCOVERED
+<len_medium, qos_normal> hits: 0 UNCOVERED
+<len_medium, qos_urgent> hits: 0 UNCOVERED
+<len_max, qos_high> hits: 0 UNCOVERED
+<len_max, qos_urgent> hits: 0 UNCOVERED
+=======================================================
+Overall Coverage: 52.17%
+=======================================================

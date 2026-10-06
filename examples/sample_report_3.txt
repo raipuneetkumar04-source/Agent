@@ -1,0 +1,41 @@
+=======================================================
+Functional Coverage Report
+Design: spi_master_controller
+Date: 2025-01-15
+=======================================================
+
+Covergroup: cg_spi_clock_modes
+Coverage: 50.00% (2/4 bins)
+Coverpoint: cp_cpol_cpha_mode
+bin mode_0[cpol0_cpha0] hits: 8400 covered
+bin mode_1[cpol0_cpha1] hits: 3200 covered
+bin mode_2[cpol1_cpha0] hits: 0 UNCOVERED
+bin mode_3[cpol1_cpha1] hits: 0 UNCOVERED
+-------------------------------------------------------
+Covergroup: cg_fifo_exceptions
+Coverage: 60.00% (3/5 bins)
+Coverpoint: cp_fifo_watermarks
+bin fifo_empty hits: 14000 covered
+bin fifo_half hits: 6500 covered
+bin fifo_full hits: 1200 covered
+bin fifo_overflow hits: 0 UNCOVERED
+bin fifo_underrun hits: 0 UNCOVERED
+-------------------------------------------------------
+Covergroup: cg_chip_select
+Coverage: 66.67% (2/3 bins)
+Coverpoint: cp_slave_select
+bin cs_slave_0 hits: 5400 covered
+bin cs_slave_1 hits: 4100 covered
+bin cs_broadcast hits: 0 UNCOVERED
+-------------------------------------------------------
+Cross Coverage: cross_mode_fifo
+Coverage: 33.33% (2/6 bins)
+<mode_0, fifo_empty> hits: 4500 covered
+<mode_0, fifo_full> hits: 1200 covered
+<mode_1, fifo_empty> hits: 1800 covered
+<mode_2, fifo_empty> hits: 0 UNCOVERED
+<mode_3, fifo_empty> hits: 0 UNCOVERED
+<mode_3, fifo_overflow> hits: 0 UNCOVERED
+=======================================================
+Overall Coverage: 50.00%
+=======================================================

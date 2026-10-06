@@ -1,0 +1,8 @@
+# Core dependencies
+pydantic>=2.0.0
+requests>=2.28.0
+python-dotenv>=1.0.0
+rich>=13.0.0
+
+# Optional external LLM SDKs (Direct REST fallback also included)
+openai>=1.0.0

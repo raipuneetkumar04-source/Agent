@@ -1,0 +1,360 @@
+{
+  "parsed_report": {
+    "design": "axi_interconnect_crossbar",
+    "date": "2025-01-10",
+    "overall_coverage": 52.17,
+    "covergroups": [
+      {
+        "name": "cg_transaction_burst",
+        "coverage": 66.67,
+        "coverpoints": [
+          {
+            "name": "cp_burst_length",
+            "bins": [
+              {
+                "name": "len_1",
+                "range": "[1]",
+                "hits": 8200,
+                "covered": true
+              },
+              {
+                "name": "len_short",
+                "range": "[2:8]",
+                "hits": 3450,
+                "covered": true
+              },
+              {
+                "name": "len_medium",
+                "range": "[9:64]",
+                "hits": 1120,
+                "covered": true
+              },
+              {
+                "name": "len_max",
+                "range": "[256]",
+                "hits": 0,
+                "covered": false
+              }
+            ]
+          },
+          {
+            "name": "cp_burst_type",
+            "bins": [
+              {
+                "name": "burst_fixed",
+                "range": null,
+                "hits": 150,
+                "covered": true
+              },
+              {
+                "name": "burst_incr",
+                "range": null,
+                "hits": 12500,
+                "covered": true
+              },
+              {
+                "name": "burst_wrap",
+                "range": null,
+                "hits": 0,
+                "covered": false
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "cg_qos_priority_arbitration",
+        "coverage": 50.0,
+        "coverpoints": [
+          {
+            "name": "cp_master_priority",
+            "bins": [
+              {
+                "name": "qos_low",
+                "range": "[0:3]",
+                "hits": 4500,
+                "covered": true
+              },
+              {
+                "name": "qos_normal",
+                "range": "[4:7]",
+                "hits": 7800,
+                "covered": true
+              },
+              {
+                "name": "qos_high",
+                "range": "[8:11]",
+                "hits": 0,
+                "covered": false
+              },
+              {
+                "name": "qos_urgent",
+                "range": "[12:15]",
+                "hits": 0,
+                "covered": false
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "cg_response_errors",
+        "coverage": 40.0,
+        "coverpoints": [
+          {
+            "name": "cp_resp_status",
+            "bins": [
+              {
+                "name": "okay",
+                "range": null,
+                "hits": 15600,
+                "covered": true
+              },
+              {
+                "name": "exokay",
+                "range": null,
+                "hits": 120,
+                "covered": true
+              },
+              {
+                "name": "slverr",
+                "range": null,
+                "hits": 0,
+                "covered": false
+              },
+              {
+                "name": "decerr",
+                "range": null,
+                "hits": 0,
+                "covered": false
+              }
+            ]
+          },
+          {
+            "name": "cp_interconnect_timeout",
+            "bins": [
+              {
+                "name": "timer_expired",
+                "range": null,
+                "hits": 0,
+                "covered": false
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "uncovered_bins": [
+      {
+        "covergroup": "cg_transaction_burst",
+        "coverpoint": "cp_burst_length",
+        "bin": "len_max[256]"
+      },
+      {
+        "covergroup": "cg_transaction_burst",
+        "coverpoint": "cp_burst_type",
+        "bin": "burst_wrap"
+      },
+      {
+        "covergroup": "cg_qos_priority_arbitration",
+        "coverpoint": "cp_master_priority",
+        "bin": "qos_high[8:11]"
+      },
+      {
+        "covergroup": "cg_qos_priority_arbitration",
+        "coverpoint": "cp_master_priority",
+        "bin": "qos_urgent[12:15]"
+      },
+      {
+        "covergroup": "cg_response_errors",
+        "coverpoint": "cp_resp_status",
+        "bin": "slverr"
+      },
+      {
+        "covergroup": "cg_response_errors",
+        "coverpoint": "cp_resp_status",
+        "bin": "decerr"
+      },
+      {
+        "covergroup": "cg_response_errors",
+        "coverpoint": "cp_interconnect_timeout",
+        "bin": "timer_expired"
+      }
+    ],
+    "cross_coverage": [
+      {
+        "name": "cross_burst_qos",
+        "coverage": 37.5,
+        "uncovered": [
+          "<len_short, qos_high>",
+          "<len_medium, qos_normal>",
+          "<len_medium, qos_urgent>",
+          "<len_max, qos_high>",
+          "<len_max, qos_urgent>"
+        ]
+      }
+    ]
+  },
+  "suggestions": [
+    {
+      "target_bin": "cg_qos_priority_arbitration.cp_master_priority.qos_high",
+      "priority": "high",
+      "difficulty": "easy",
+      "suggestion": "Assert high Quality of Service (QoS=8 to 11) on Master 2 while low QoS traffic is active on Master 1 to test priority preemption.",
+      "test_outline": [
+        "1. Start steady stream of low QoS (QoS=2) traffic on Master 1",
+        "2. Issue high priority read transaction (QoS=10) on Master 2 to contending slave port",
+        "3. Measure arbitration grant latency to verify Master 2 gets preemptive grant",
+        "4. Verify high QoS transaction completes ahead of pending Master 1 requests"
+      ],
+      "dependencies": [],
+      "reasoning": "Low and normal QoS traffic are covered. Programming master QoS registers to range [8:11] exercises the higher tiers of multi-level priority arbiters.",
+      "priority_score": 0.7714,
+      "coverage_impact": 0.4286,
+      "inverse_difficulty": 1.0,
+      "dependency_score": 1.0
+    },
+    {
+      "target_bin": "cg_qos_priority_arbitration.cp_master_priority.qos_urgent",
+      "priority": "high",
+      "difficulty": "easy",
+      "suggestion": "Issue highest emergency QoS level transactions (QoS=15) during crossbar bandwidth saturation.",
+      "test_outline": [
+        "1. Saturate all interconnect slave ports with concurrent normal transactions",
+        "2. Inject single emergency write transaction with AxQOS = 4'b1111 (qos_urgent)",
+        "3. Check that arbiter immediately halts lower priority scheduling and routes urgent packet",
+        "4. Validate zero cycle starvation on urgent channel"
+      ],
+      "dependencies": [],
+      "reasoning": "Urgent QoS (12-15) is designed for real-time display/camera subsystem traffic. Simply requires setting AxQOS[3:0] >= 12 on the master interface.",
+      "priority_score": 0.7714,
+      "coverage_impact": 0.4286,
+      "inverse_difficulty": 1.0,
+      "dependency_score": 1.0
+    },
+    {
+      "target_bin": "cg_transaction_burst.cp_burst_length.len_max",
+      "priority": "medium",
+      "difficulty": "medium",
+      "suggestion": "Drive an AXI4 maximum allowable burst length (AxLEN=255, 256 beats) across crossbar to verify interconnect beat counter rollover.",
+      "test_outline": [
+        "1. Configure master VIP to issue INCR write burst with AxLEN=255",
+        "2. Target high-throughput slave memory port",
+        "3. Verify interconnect propagates all 256 beats without stall or lost data beats",
+        "4. Check WLAST and BVALID handshakes match protocol compliance"
+      ],
+      "dependencies": [
+        "Slave VIP configured with deep burst buffer"
+      ],
+      "reasoning": "Short (2-8) and medium (9-64) bursts are covered. 256-beat bursts test crossbar data buffer FIFO depth and internal credit counters at maximum capacity.",
+      "priority_score": 0.4714,
+      "coverage_impact": 0.4286,
+      "inverse_difficulty": 0.5,
+      "dependency_score": 0.5
+    },
+    {
+      "target_bin": "cg_transaction_burst.cp_burst_type.burst_wrap",
+      "priority": "low",
+      "difficulty": "medium",
+      "suggestion": "Issue AXI cacheline WRAP4, WRAP8, and WRAP16 read bursts targeted at slave cache memory.",
+      "test_outline": [
+        "1. Set master VIP AxBURST to 2'b10 (WRAP) with AxLEN = 3, 7, and 15",
+        "2. Align start address within cache line boundary",
+        "3. Verify slave return beats wrap correctly to lower boundary",
+        "4. Check crossbar address generation unit preserves wrap boundary"
+      ],
+      "dependencies": [
+        "Slave memory model supporting wrapping addresses"
+      ],
+      "reasoning": "Fixed and INCR bursts have thousands of hits, but wrap bursts require specific burst length (2, 4, 8, 16) and aligned addresses, typically generated by CPU cache controllers.",
+      "priority_score": 0.3572,
+      "coverage_impact": 0.1429,
+      "inverse_difficulty": 0.5,
+      "dependency_score": 0.5
+    },
+    {
+      "target_bin": "cg_response_errors.cp_resp_status.slverr",
+      "priority": "low",
+      "difficulty": "medium",
+      "suggestion": "Program slave VIP responder to return SLVERR on address access to protected peripheral aperture.",
+      "test_outline": [
+        "1. Configure slave peripheral VIP error callback to assert RRESP=2'b10 (SLVERR)",
+        "2. Issue master read transaction to peripheral address",
+        "3. Verify interconnect passes SLVERR back to the initiating master without dropping channel",
+        "4. Check interconnect error logging status register"
+      ],
+      "dependencies": [
+        "Slave VIP error injection callback support"
+      ],
+      "reasoning": "OKAY and EXOKAY are covered under normal operations. SLVERR requires either slave VIP error configuration or attempting an illegal access to a slave register.",
+      "priority_score": 0.3572,
+      "coverage_impact": 0.1429,
+      "inverse_difficulty": 0.5,
+      "dependency_score": 0.5
+    },
+    {
+      "target_bin": "cg_response_errors.cp_resp_status.decerr",
+      "priority": "low",
+      "difficulty": "hard",
+      "suggestion": "Drive master transactions to unmapped address holes in interconnect address map to trigger internal default slave DECERR.",
+      "test_outline": [
+        "1. Identify unmapped holes in interconnect address decode table",
+        "2. Master VIP sends write request to unmapped address 0xDEAD_0000",
+        "3. Verify internal default slave responds with BRESP=2'b11 (DECERR)",
+        "4. Ensure bus pipeline drains cleanly and crossbar remains operational"
+      ],
+      "dependencies": [
+        "Knowledge of interconnect system memory map"
+      ],
+      "reasoning": "DECERR is generated by the crossbar's internal error responder when no slave port matches the requested address decoding window.",
+      "priority_score": 0.3072,
+      "coverage_impact": 0.1429,
+      "inverse_difficulty": 0.3333,
+      "dependency_score": 0.5
+    },
+    {
+      "target_bin": "cg_response_errors.cp_interconnect_timeout.timer_expired",
+      "priority": "low",
+      "difficulty": "hard",
+      "suggestion": "Configure slave agent to permanently withhold BVALID/RVALID handshake and verify crossbar protocol watchdog timer triggers timeout.",
+      "test_outline": [
+        "1. Set interconnect bus timeout counter register to 256 cycles",
+        "2. Master issues read request to Slave 3",
+        "3. Force Slave 3 VIP to withhold ARREADY or RVALID indefinitely",
+        "4. Verify interconnect raises timeout interrupt, terminates transaction with DECERR, and unblocks arbiter"
+      ],
+      "dependencies": [
+        "Slave VIP unresponsive stall mode capability"
+      ],
+      "reasoning": "Watchdog timeout protects against system lockup caused by unresponsive third-party IP cores. Requires artificial slave stalling.",
+      "priority_score": 0.3072,
+      "coverage_impact": 0.1429,
+      "inverse_difficulty": 0.3333,
+      "dependency_score": 0.5
+    }
+  ],
+  "prediction": {
+    "current_coverage": 52.17,
+    "target_coverage": 100.0,
+    "coverage_gap": 47.83,
+    "total_uncovered_bins": 7,
+    "estimated_iterations_needed": 11400,
+    "estimated_time_to_closure_hours": 31.0,
+    "closure_probability_pct": 71.0,
+    "blocking_bins": [
+      {
+        "bin": "cg_response_errors.cp_resp_status.slverr",
+        "reason": "Dependency on: Slave VIP error injection callback support",
+        "required_infrastructure": "Interconnect / AXI Error Injector IP missing or disabled",
+        "risk_level": "MEDIUM"
+      },
+      {
+        "bin": "cg_response_errors.cp_resp_status.decerr",
+        "reason": "Dependency on: Knowledge of interconnect system memory map",
+        "required_infrastructure": "Unmapped decerr address space undefined in system top",
+        "risk_level": "HIGH"
+      }
+    ],
+    "verdict": "MODERATE RISK: Closure achievable, but requires testbench infrastructure enhancements (e.g. error injection)."
+  }
+}
